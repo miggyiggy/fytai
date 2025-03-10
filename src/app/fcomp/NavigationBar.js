@@ -1,8 +1,8 @@
 "use client";
-
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import styled from "styled-components";
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import styled from 'styled-components';
+import PersonalIcon from '../fcomp/PersonalIcon'; // Import the PersonalIcon component
 
 const NavBarContainer = styled.nav`
   background-color: black;
@@ -26,7 +26,7 @@ const NavItem = styled.a`
   border-radius: 4px;
 
   &:hover {
-    background-color: rgba(0, 89, 255, 0.2);
+    background-color: #366477;
   }
 `;
 
@@ -57,16 +57,6 @@ const Emblem = styled.img`
   height: auto;
 `;
 
-const LogoutButton = styled.button`
-  background-color: white;
-  color: black;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 1rem;
-`;
-
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState(null);
@@ -78,14 +68,7 @@ const NavBar = () => {
       setIsLoggedIn(true);
       setUserRole(role);
     }
-    console.log("NavBar useEffect:", isLoggedIn, userRole);
-  }, []);
-
-  console.log("NavBar rendering:", isLoggedIn, userRole);
-
-  // if (!isLoggedIn) {
-  //   return null; // Temporarily commented out
-  // }
+  },[]);
 
   return (
     <NavBarContainer>
@@ -97,45 +80,20 @@ const NavBar = () => {
       </LogoContainer>
 
       <NavItems>
-        {userRole === "admin" ? (
-          <>
-            <Link href="/admin/dashboard">
-              <NavItem>Dashboard</NavItem>
-            </Link>
-            <Link href="/admin/users">
-              <NavItem>Users</NavItem>
-            </Link>
-          </>
-        ) : (
+        {isLoggedIn && (
           <>
             <Link href="/homepage">
               <NavItem>Home</NavItem>
             </Link>
-            <Link href="/profile_management">
-              <NavItem>Profile Management</NavItem>
-            </Link>
-            <Link href="/AI_workout_planner">
+            <Link href="/workout_planner">
               <NavItem>AI Workout Planner</NavItem>
             </Link>
-            <Link href="/progress_track_&_analytics">
-              <NavItem>Progress Track & Analytics</NavItem>
-            </Link>
-            <Link href="/help&support">
-              <NavItem>Help & Support</NavItem>
+            <Link href="/progress_&_analytics">
+              <NavItem>Progress & Analytics</NavItem>
             </Link>
           </>
         )}
-        <LogoutButton
-          onClick={() => {
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
-            setIsLoggedIn(false);
-            setUserRole(null);
-            window.location.href = "/";
-          }}
-        >
-          Logout
-        </LogoutButton>
+        <PersonalIcon /> {/* Include the PersonalIcon component */}
       </NavItems>
     </NavBarContainer>
   );
