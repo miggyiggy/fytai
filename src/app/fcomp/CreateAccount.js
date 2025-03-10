@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import SignButton from "../fcomp/SignButton";
+import SignButton from "./SignButton";
 
 const FormContainer = styled.div`
   width: 700px;

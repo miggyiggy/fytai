@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import styled from "styled-components";
-import RegistrationForm from "../fcomp/Registration";
+import RegistrationForm from "../fcomp/CreateAccount";
 import Login from "../fcomp/Login";
 
 // ✅ Black Navbar Container

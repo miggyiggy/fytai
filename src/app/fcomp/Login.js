@@ -22,7 +22,7 @@ const LoginInput = styled.input`
     font-size: 16px;
     width: 100%;
     box-sizing: border-box;
-    background-color: white;
+    background: white;
 `;
 
 const Title = styled.h2`

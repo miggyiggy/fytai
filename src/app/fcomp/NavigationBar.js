@@ -68,7 +68,9 @@ const NavBar = () => {
       setIsLoggedIn(true);
       setUserRole(role);
     }
+    console.log("NavBar useEffect:", isLoggedIn, userRole);
   },[]);
+    console.log("NavBar rendering:", isLoggedIn, userRole);
 
   return (
     <NavBarContainer>
@@ -82,7 +84,7 @@ const NavBar = () => {
       <NavItems>
         {isLoggedIn && (
           <>
-            <Link href="/homepage">
+            <Link href="/home_page">
               <NavItem>Home</NavItem>
             </Link>
             <Link href="/workout_planner">
