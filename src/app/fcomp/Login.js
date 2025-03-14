@@ -6,7 +6,7 @@ const LoginForm = styled.form`
     padding: 15px;
     margin: 15px;
     background: #a2a5a8;
-    border: 3px solid #000000;
+    border: 3px solid #f4f4f5;
     width: 400px;
     height: 400px;
     display: flex;

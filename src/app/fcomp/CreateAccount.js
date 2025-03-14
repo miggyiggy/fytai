@@ -6,7 +6,6 @@ const FormContainer = styled.div`
   width: 700px;
   height: auto;
   background: #a2a5a8;
-  border-radius: 20px;
   border: 5px solid #f4f4f5;
   padding: 30px;
   display: flex;
