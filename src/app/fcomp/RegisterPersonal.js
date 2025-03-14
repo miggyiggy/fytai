@@ -104,14 +104,14 @@ function RegisterPersonal(){
   const validateForm = () => {
     let newErrors = {};
 
-    if (!formData.firstName.trim()) newErrors.firstName = "First Name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last Name is required";
+    if (!formData.Name.trim()) newErrors.Name = "Name is required";
+    if (!formData.age.trim()) newErrors.age = "age is required";
     if (!formData.contactNumber.trim())
       newErrors.contactNumber = "Contact Number is required";
+    if (!formData.sex.trim()) newErrors.sex = "sex is required";
     if (!formData.email.trim()) newErrors.email = "Email Address is required";
-    if (!formData.password.trim()) newErrors.password = "Password is required";
-    if (formData.password !== formData.confirmPassword)
-      newErrors.confirmPassword = "Passwords do not match";
+    if (!formData.height.trim()) newErrors.height = "height is required";
+    if (!formData.weight.trim()) newErrors.weight = "weight is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

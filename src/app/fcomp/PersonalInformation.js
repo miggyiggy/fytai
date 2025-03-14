@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 
 const PersonalInfoContainer = styled.div`
@@ -29,6 +29,29 @@ const Value = styled.span`
   /* Add styling if needed */
 `;
 
+const EditButton = styled.button`
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #3e8e41; /* Darker green on hover */
+`;
+
+const InputField = styled.input`
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 60%; /* Adjust width as needed */
+`;
+
 const PersonalInformation = () => {
   return (
     <PersonalInfoContainer>
@@ -48,6 +71,8 @@ const PersonalInformation = () => {
         <Label>Sex:</Label>
         <Value>Male</Value>
       </InfoRow>
+
+      <EditButton href="/personal_information">Edit Information</EditButton>
 
       {/* Add more rows as needed */}
     </PersonalInfoContainer>
