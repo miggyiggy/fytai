@@ -128,7 +128,7 @@ const CloseButton = styled.button`
   }
 `;
 
-const WelcomeNavBar = () => {
+const LandingNavBar = () => {
   const [activeForm, setActiveForm] = useState(null);
 
   const toggleForm = (formType) => {
@@ -163,4 +163,4 @@ const WelcomeNavBar = () => {
   );
 };
 
-export default WelcomeNavBar;
+export default LandingNavBar;

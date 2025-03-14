@@ -49,9 +49,9 @@ const Logo = styled.span`
 `;
 
 const EmblemContainer = styled.div`
-  background-color: #e0e0e0;
+  background-color: #000000;
   border-radius: 50%;
-  padding: 0.5rem;
+  padding: 0.3rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -83,7 +83,7 @@ const NavBar = () => {
     <NavBarContainer>
       <LogoContainer>
         <EmblemContainer>
-          <Emblem src=".." alt="Emblem" />
+          <Emblem src="/FytAI New Logo.png" alt="Emblem" />
         </EmblemContainer>
         <Logo>FytAI</Logo>
       </LogoContainer>
