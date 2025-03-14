@@ -64,7 +64,7 @@ const PersonalIcon = () => {
 
   return (
     <IconContainer>
-      <IconImage src="../public/icon.png" alt="Personal Icon" onClick={handleIconClick} />
+      <IconImage src="/icon.png" alt="Personal Icon" onClick={handleIconClick} />
       <Modal show={showModal}>
         <ModalItem href="/profile_page">Profile</ModalItem>
         <ModalItem href="/help-support">Help & Support</ModalItem>
