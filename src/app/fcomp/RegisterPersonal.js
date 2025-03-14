@@ -112,6 +112,7 @@ function RegisterPersonal(){
     if (!formData.email.trim()) newErrors.email = "Email Address is required";
     if (!formData.height.trim()) newErrors.height = "height is required";
     if (!formData.weight.trim()) newErrors.weight = "weight is required";
+    if (!formData.bodyMass.trim()) newErrors.bodyMass = "weight is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
