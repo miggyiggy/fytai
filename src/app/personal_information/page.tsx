@@ -3,7 +3,9 @@
 "use client";
 import React from 'react';
 import NavigationBar from '../fcomp/NavigationBar'; // Adjust the import path
-import RegisterPersonalInfo from '../fcomp/RegisterPersonalInfo'; // Adjust the import path
+import RegisterPersonalInfo from '../fcomp/RegisterPersonal'; // Adjust the import path
+import PersonalInformation from '../fcomp/PersonalInformation';
+import FitnessDetails from '../fcomp/FitnessDetails';
 import styled from 'styled-components';
 
 const PageContainer = styled.div`
@@ -25,7 +27,8 @@ const PersonalInfoPage = () => {
     <PageContainer>
       <NavigationBar />
       <ContentContainer>
-        <RegisterPersonalInfo />
+        <PersonalInformation />
+        <FitnessDetails />
       </ContentContainer>
     </PageContainer>
   );

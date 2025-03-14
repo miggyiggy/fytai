@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import Button from "../fcomp/GeneralButtons";
-import GeneralButton from "../fcomp/GeneralButtons";
+import Button from "./GeneralButtons";
+import GeneralButton from "./GeneralButtons";
 import styled from "styled-components";
 
 const Container = styled.div`

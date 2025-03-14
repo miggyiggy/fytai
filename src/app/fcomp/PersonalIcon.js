@@ -22,7 +22,7 @@ const Modal = styled.div`
   border: 1px solid #ccc;
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
   z-index: 10;
-  display: ${props => props.show === 'true' ? 'block' : 'none'};
+  display: ${props => props.show ? 'block' : 'none'};
 `;
 
 const ModalItem = styled.a`
@@ -64,9 +64,9 @@ const PersonalIcon = () => {
 
   return (
     <IconContainer>
-      <IconImage src="/public/icon.png" alt="Personal Icon" onClick={handleIconClick} />
+      <IconImage src="../public/icon.png" alt="Personal Icon" onClick={handleIconClick} />
       <Modal show={showModal}>
-        <ModalItem href="/personal-info">Personal Information</ModalItem>
+        <ModalItem href="/personal_information">Personal Information</ModalItem>
         <ModalItem href="/help-support">Help & Support</ModalItem>
         <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
       </Modal>

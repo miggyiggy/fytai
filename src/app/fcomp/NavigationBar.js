@@ -16,6 +16,13 @@ const NavBarContainer = styled.nav`
 const NavItems = styled.div`
   display: flex;
   align-items: center;
+  jsutify-content: center;
+`;
+
+const CenterNavItems = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-grow: 1;
 `;
 
 const NavItem = styled.a`
@@ -76,25 +83,25 @@ const NavBar = () => {
     <NavBarContainer>
       <LogoContainer>
         <EmblemContainer>
-          <Emblem src="/images/emblem.png" alt="Emblem" />
+          <Emblem src=".." alt="Emblem" />
         </EmblemContainer>
         <Logo>FytAI</Logo>
       </LogoContainer>
 
       <NavItems>
-        {isLoggedIn && (
-          <>
-            <Link href="/home_page">
-              <NavItem>Home</NavItem>
-            </Link>
-            <Link href="/workout_planner">
-              <NavItem>AI Workout Planner</NavItem>
-            </Link>
-            <Link href="/progress_&_analytics">
-              <NavItem>Progress & Analytics</NavItem>
-            </Link>
-          </>
-        )}
+          <CenterNavItems>
+            <>
+              <Link href="/home_page">
+                <NavItem>Home</NavItem>
+              </Link>
+              <Link href="/workout_planner">
+                <NavItem>AI Workout Planner</NavItem>
+              </Link>
+              <Link href="/progress_&_analytics">
+                <NavItem>Progress & Analytics</NavItem>
+              </Link>
+            </>
+          </CenterNavItems>
         <PersonalIcon /> {/* Include the PersonalIcon component */}
       </NavItems>
     </NavBarContainer>
