@@ -40,7 +40,7 @@ const StyledLabel = styled.label`
 `;
 
 const LInput = styled.input`
-  color: white;
+  color: black;
   padding: 10px;
   margin-top: 5px;
   margin-bottom: 10px;

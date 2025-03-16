@@ -142,7 +142,6 @@ const LandingNavBar = () => {
         <LogoContainer>FytAI</LogoContainer>
         
         <ButtonContainer>
-          <NavButton onClick={() => toggleForm("login")}>Log In</NavButton>
           <NavButton onClick={() => toggleForm("register")}>Register</NavButton>
         </ButtonContainer>
       </NavBarContainer>
@@ -156,7 +155,6 @@ const LandingNavBar = () => {
           <CloseButton onClick={() => setActiveForm(null)}>X</CloseButton>
           
           {activeForm === "register" && <RegistrationForm />}
-          {activeForm === "login" && <Login />}
         </ModalContainer>
       )}
     </>

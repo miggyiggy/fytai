@@ -37,7 +37,7 @@ const ProgressAnalytics = () => {
       <ContentContainer>
         <SectionLink href="/workout-history">Workout History</SectionLink>
         <SectionLink href="/performance-metrics">Performance Metrics</SectionLink>
-        <SectionLink href="/goal-setting">Goal Setting & Achievements</SectionLink>
+        <SectionLink href="/goal_setting">Goal Setting & Achievements</SectionLink>
       </ContentContainer>
     </PageContainer>
   );

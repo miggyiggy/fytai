@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import styled from "styled-components";
-import NavigationBar from "../fcomp/NavigationBar";
+import NavBar from "../fcomp/NavigationBar";
 import Link from "next/link"; // Import Link
 
 const PageContainer = styled.div`
@@ -21,7 +21,7 @@ const ContentContainer = styled.div`
 
 const SectionLink = styled(Link)`
   font-size: 1.5rem;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   text-decoration: none;
   color: #333; /* Or your preferred color */
 
@@ -33,9 +33,9 @@ const SectionLink = styled(Link)`
 const WorkoutPlanner = () => {
   return (
     <PageContainer>
-      <NavigationBar />
+      <NavBar />
       <ContentContainer>
-        <SectionLink href="/personalized_plan">Generate Personalized Plan</SectionLink>
+        <SectionLink href="/personalized_planner">Generate Personalized Plan</SectionLink>
         <SectionLink href="/customization">Customization</SectionLink>
         <SectionLink href="/AI_recommendation">AI Recommendations</SectionLink>
       </ContentContainer>
