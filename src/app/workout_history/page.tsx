@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import styled from "styled-components";
 import NavBar from "../fcomp/NavigationBar";
@@ -13,17 +12,16 @@ const PageContainer = styled.div`
 const ContentContainer = styled.div`
   flex-grow: 1;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 20px;
 `;
 
-const AIRecommendation = () => {
+const WorkoutHistory = () => {
     return(
         <PageContainer>
             <NavBar />
         </PageContainer>
     )
 }
-
-export default AIRecommendation;
