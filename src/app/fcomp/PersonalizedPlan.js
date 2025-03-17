@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import SignButton from "./SignButton";
+import SignButton from "../fcomp/SignButton";
 import BMIPopup from "../fcomp/BMIPopup"
 
 const FormContainer = styled.div`
@@ -13,6 +13,51 @@ const FormContainer = styled.div`
   flex-direction: column;
   align-items: center;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+`;
+
+const BlurOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+`;
+
+const ModalContainer = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  padding: 0;
+  text-align: center;
+  z-index: 1001;
+  border: none;
+  width: auto;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  background: black;
+  color: white;
+  border: 2px solid white;
+  font-size: 16px;
+  font-weight: bold;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1002;
+  transition: background 0.2s;
+
+  &:hover {
+    background: red;
+  }
 `;
 
 const Title = styled.h2`
@@ -116,7 +161,29 @@ function PersonalizedPlan() {
     setHeight(value);
   };
 
+  const getFitnessGoal = (bmi, gender) => {
+    if (bmi < 18.5) {
+      return "Gain weight and build muscle.";
+    } else if (bmi >= 18.5 && bmi < 25) {
+      return "Maintain a healthy weight and focus on overall fitness.";
+    } else if (bmi >= 25 && bmi < 30) {
+      return "Lose weight and improve cardiovascular health.";
+    } else {
+      return "Consult a healthcare professional for personalized advice.";
+    }
+  };
+
+  const calculateBMI = (weight, height) => {
+    const heightMeters = parseFloat(height);
+    const weightKg = parseFloat(weight);
+    if (isNaN(heightMeters) || isNaN(weightKg) || heightMeters <= 0) {
+      return 0;
+    }
+    return weightKg / (heightMeters * heightMeters);
+  };
+
   const handleSubmit = async (event) => {
+    console.log("handleSubmit called!");
     event.preventDefault();
 
     // Basic validation
@@ -151,17 +218,15 @@ function PersonalizedPlan() {
         level,
       });
       // Add your API call or data collection here
-    }
 
-    if (!hasErrors) {
-        const calculatedBMI = calculateBMI(weight, height);
-        const calculatedFitnessGoal = getFitnessGoal(calculatedBMI, gender);
-  
-        setBmi(calculatedBMI);
-        setFitnessGoal(calculatedFitnessGoal);
-        setShowPopup(true);
-      }
-    
+      const calculatedBMI = calculateBMI(weight, height);
+      const calculatedFitnessGoal = getFitnessGoal(calculatedBMI, gender);
+
+      setBmi(calculatedBMI);
+      setFitnessGoal(calculatedFitnessGoal);
+      setShowPopup(true);
+
+    }
   };
 
   const closePopup = () => {
@@ -223,11 +288,13 @@ function PersonalizedPlan() {
       </center>
       
       {showPopup && (
-        <BMIPopup
-          bmi={bmi}
-          fitnessGoal={fitnessGoal}
-          onClose={closePopup}
-        />
+        <>
+          <BlurOverlay onClick={closePopup} />
+          <ModalContainer>
+            <CloseButton onClick={closePopup}>X</CloseButton>
+            <BMIPopup bmi={bmi} fitnessGoal={fitnessGoal} onClose={closePopup} />
+          </ModalContainer>
+        </>
       )}
     </FormContainer>
   );
