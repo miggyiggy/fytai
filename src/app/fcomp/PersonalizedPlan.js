@@ -134,14 +134,16 @@ function PersonalizedPlan() {
   const [showPopup, setShowPopup] = useState(false);
   const [bmi, setBmi] = useState(0);
   const [fitnessGoal, setFitnessGoal] = useState("");
+  const [calculatedBmi, setCalculatedBmi] = useState(null);
+  const [calculatedFitnessGoal, setCalculatedFitnessGoal] = useState(null);
 
   const handleWeightChange = (e) => {
     const value = e.target.value;
     const weightValue = parseFloat(value);
     if (!/^\d*\.?\d*$/.test(value)) {
       setWeightError("Weight must be a number");
-    } else if (weightValue < 20 || weightValue > 200) {
-      setWeightError("Weight must be between 20 and 200 kg");
+    } else if (weightValue < 20.0 || weightValue > 200.0) {
+      setWeightError("Weight must be between 20.0 and 200.0 kg");
     } else {
       setWeightError("");
     }
@@ -219,6 +221,15 @@ function PersonalizedPlan() {
       });
       // Add your API call or data collection here
 
+      if (response.ok) {
+        const result = await response.json();
+        setCalculatedBmi(result.bmi);
+        setCalculatedFitnessGoal(result.fitness_goal);
+        setShowPopup(true);
+      } else {
+          // ... (error handling)
+      }
+
       const calculatedBMI = calculateBMI(weight, height);
       const calculatedFitnessGoal = getFitnessGoal(calculatedBMI, gender);
 
@@ -242,6 +253,7 @@ function PersonalizedPlan() {
         type="text"
         id="weight"
         value={weight}
+        placeholder="80"
         onChange={handleWeightChange}
       />
       {weightError && <ErrorText>{weightError}</ErrorText>}
@@ -251,15 +263,17 @@ function PersonalizedPlan() {
         type="text"
         id="height"
         value={height}
+        placeholder="1.72"
         onChange={handleHeightChange}
       />
       {heightError && <ErrorText>{heightError}</ErrorText>}
 
-      <InputGroup htmlFor="gender">Gender (M/F):</InputGroup>
+      <InputGroup htmlFor="gender">Gender (Male/Female):</InputGroup>
       <LInput
         type="text"
         id="gender"
         value={gender}
+        placeholder="Male or Female"
         onChange={(e) => setGender(e.target.value)}
       />
 
@@ -286,16 +300,25 @@ function PersonalizedPlan() {
       <center>
         <SignButton type="submit">Generate</SignButton>
       </center>
+
+      {calculatedBmi !== null && calculatedFitnessGoal !== null && (
+                <FitnessDetails
+                    bmi={calculatedBmi}
+                    fitnessGoal={calculatedFitnessGoal}
+                    height={height}
+                    weight={weight}
+                />
+          )}
       
       {showPopup && (
-        <>
-          <BlurOverlay onClick={closePopup} />
-          <ModalContainer>
-            <CloseButton onClick={closePopup}>X</CloseButton>
-            <BMIPopup bmi={bmi} fitnessGoal={fitnessGoal} onClose={closePopup} />
-          </ModalContainer>
-        </>
-      )}
+                <>
+                    <BlurOverlay onClick={closePopup} />
+                    <ModalContainer>
+                        <CloseButton onClick={closePopup}>X</CloseButton>
+                        <BMIPopup bmi={calculatedBmi} fitnessGoal={calculatedFitnessGoal} onClose={closePopup} />
+                    </ModalContainer>
+                </>
+            )}
     </FormContainer>
   );
 }

@@ -42,28 +42,28 @@ const FitnessLevelValue = styled(Value)`
   text-align: center;
 `;
 
-const FitnessDetails = () => {
+const FitnessDetails = ({ bmi, fitnessGoal, height, weight }) => {
   return (
-    <FitnessDetailsContainer>
-      <Title>Fitness Details</Title>
-      <Content>
-        <Column>
-          <Label>Body Mass Index:</Label>
-          <Value>25</Value> {/* Replace with actual data */}
+      <FitnessDetailsContainer>
+          <Title>Fitness Details</Title>
+          <Content>
+              <Column>
+                  <Label>Body Mass Index:</Label>
+                  <Value>{bmi ? bmi.toFixed(2) : 'N/A'}</Value>
 
-          <Label>Height:</Label>
-          <Value>175 cm</Value> {/* Replace with actual data */}
+                  <Label>Height:</Label>
+                  <Value>{height ? `${height} m` : 'N/A'}</Value>
 
-          <Label>Weight:</Label>
-          <Value>75 kg</Value> {/* Replace with actual data */}
-        </Column>
+                  <Label>Weight:</Label>
+                  <Value>{weight ? `${weight} kg` : 'N/A'}</Value>
+              </Column>
 
-        <Column>
-          <Label>Fitness Level:</Label>
-          <FitnessLevelValue>Moderate</FitnessLevelValue>
-        </Column>
-      </Content>
-    </FitnessDetailsContainer>
+              <Column>
+                  <Label>Fitness Goal:</Label>
+                  <Value>{fitnessGoal || 'N/A'}</Value>
+              </Column>
+          </Content>
+      </FitnessDetailsContainer>
   );
 };
 
