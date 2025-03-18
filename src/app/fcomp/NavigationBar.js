@@ -83,7 +83,7 @@ const NavBar = () => {
     <NavBarContainer>
       <LogoContainer>
         <EmblemContainer>
-          <Emblem src="/FytAI New Logo.png" alt="Emblem" />
+          <Emblem src="/Images/FytAI New Logo.png" alt="Emblem" />
         </EmblemContainer>
         <Logo>FytAI</Logo>
       </LogoContainer>

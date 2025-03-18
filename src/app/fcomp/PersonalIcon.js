@@ -67,7 +67,7 @@ const PersonalIcon = () => {
       <IconImage src="/icon.png" alt="Personal Icon" onClick={handleIconClick} />
       <Modal show={showModal}>
         <ModalItem href="/profile_page">Profile</ModalItem>
-        <ModalItem href="/help-support">Help & Support</ModalItem>
+        <ModalItem href="/help&support">Help & Support</ModalItem>
         <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
       </Modal>
     </IconContainer>
