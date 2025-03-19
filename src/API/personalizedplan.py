@@ -1,8 +1,19 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
 import sqlite3
+import pickle
+from sklearn.metrics.pairwise import cosine_similarity
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Allows requests from your React app
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class UserInput(BaseModel):
     weight: float
@@ -11,19 +22,14 @@ class UserInput(BaseModel):
     body_part: str
     level: str
 
-def calculate_bmi(weight, height):
-    """Calculates BMI."""
-    try:
-        height_meters = float(height)
-        weight_kg = float(weight)
-        if height_meters <= 0:
-            return 0
-        return weight_kg / (height_meters * height_meters)
-    except ValueError:
-        return 0
+# Load the trained model
+with open('trainedmodel.pkl', 'rb') as f:
+    tfidf_matrix, tfidf_vectorizer = pickle.load(f)
 
-def get_fitness_goal(bmi, gender):
-    """Determines fitness goal based on BMI."""
+def calculate_bmi(weight, height):
+    return round(weight / (height ** 2), 2)
+
+def get_fitness_goal(bmi):
     if bmi < 18.5:
         return "Gain weight and build muscle."
     elif 18.5 <= bmi < 25:
@@ -33,31 +39,11 @@ def get_fitness_goal(bmi, gender):
     else:
         return "Consult a healthcare professional for personalized advice."
 
-@app.post("/api/calculate_bmi")
-async def calculate_bmi_api(user_input: UserInput):
-    """API endpoint to calculate BMI and store data."""
+@app.post("/api/recommendations")
+async def process_user_data(user_input: UserInput):
     bmi = calculate_bmi(user_input.weight, user_input.height)
-    fitness_goal = get_fitness_goal(bmi, user_input.gender)
-
-    # Store data in the database
-    conn = sqlite3.connect("fitness_data.db")
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        INSERT INTO fitness_data (weight_kg, height_cm, gender, body_part, level, bmi, fitness_goal)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            user_input.weight,
-            user_input.height,
-            user_input.gender,
-            user_input.body_part,
-            user_input.level,
-            bmi,
-            fitness_goal,
-        ),
-    )
-    conn.commit()
-    conn.close()
-
-    return {"bmi": bmi, "fitness_goal": fitness_goal}
+    fitness_goal = get_fitness_goal(bmi)
+    return {
+        "bmi": bmi,
+        "fitness_goal": fitness_goal
+    }
