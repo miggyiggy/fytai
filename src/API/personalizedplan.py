@@ -1,15 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import sqlite3
 import pickle
+import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 app = FastAPI()
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Allows requests from your React app
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -22,11 +22,16 @@ class UserInput(BaseModel):
     body_part: str
     level: str
 
-# Load the trained model
-with open('trainedmodel.pkl', 'rb') as f:
-    tfidf_matrix, tfidf_vectorizer = pickle.load(f)
+try:
+    with open('trainedmodel.pkl', 'rb') as f:
+        tfidf_matrix, tfidf_vectorizer = pickle.load(f)
+except FileNotFoundError:
+    print("" Error: trainedmodel.pkl not found!")
+    tfidf_matrix, tfidf_vectorizer = None, None
 
 def calculate_bmi(weight, height):
+    if height <= 0:
+        raise ValueError("Height must be greater than zero")
     return round(weight / (height ** 2), 2)
 
 def get_fitness_goal(bmi):
@@ -41,9 +46,25 @@ def get_fitness_goal(bmi):
 
 @app.post("/api/recommendations")
 async def process_user_data(user_input: UserInput):
-    bmi = calculate_bmi(user_input.weight, user_input.height)
-    fitness_goal = get_fitness_goal(bmi)
-    return {
-        "bmi": bmi,
-        "fitness_goal": fitness_goal
-    }
+    try:
+        bmi = calculate_bmi(user_input.weight, user_input.height)
+        fitness_goal = get_fitness_goal(bmi)
+
+        if not tfidf_vectorizer or not tfidf_matrix:
+            raise HTTPException(status_code=500, detail="Model is not loaded properly")
+
+        user_vector = tfidf_vectorizer.transform(
+            [f"{user_input.gender} {user_input.body_part} {user_input.level}"]
+        )
+
+        similarities = cosine_similarity(user_vector, tfidf_matrix)
+        recommended_index = np.argmax(similarities)
+
+        return {
+            "bmi": bmi,
+            "fitness_goal": fitness_goal,
+            "recommended_plan_index": int(recommended_index)
+        }
+    
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

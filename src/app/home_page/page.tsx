@@ -29,13 +29,6 @@ const ImageContainer = styled.div`
 export default function Home() {
   const [showImage, setShowImage] = useState(true);
 
-    useEffect(() => {
-        // Simulating some logic that changes the state after a short delay
-        setTimeout(() => {
-            setShowImage(false);
-        }, 2000); // 2 seconds delay
-    }, []);
-
   return (
     <PageContainer>
       <NavBar />
@@ -44,7 +37,7 @@ export default function Home() {
          <div>
             {showImage && (
                 <Image 
-                    src="/FyTAI Page 2.jpg" 
+                    src="/Images/FytAI Page 2.jpg" 
                     alt="Background Image"
                     layout="fill"
                     objectFit="cover"
