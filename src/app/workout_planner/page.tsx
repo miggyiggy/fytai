@@ -37,7 +37,7 @@ const WorkoutPlanner = () => {
       <ContentContainer>
         <SectionLink href="/personalized_planner">Generate Personalized Plan</SectionLink>
         <SectionLink href="/customization">Customization</SectionLink>
-        <SectionLink href="/AI_recommendation">AI Recommendations</SectionLink>
+        <SectionLink href="/AIRecommendations">AI Recommendations</SectionLink>
       </ContentContainer>
     </PageContainer>
   );

@@ -5,6 +5,7 @@ import pickle
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import sqlite3
+import logging
 
 app = FastAPI()
 
@@ -25,7 +26,7 @@ class UserInput(BaseModel):
     height: float
     body_part: str
     level: str
-    days_per_week: int  # Added days_per_week
+    days_per_week: int
 
 try:
     with open('trainedmodel.pkl', 'rb') as f:
@@ -53,7 +54,7 @@ def get_recommended_plan(index):
     try:
         conn = sqlite3.connect("gym_database.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT title, description FROM Exercises WHERE id = ?", (index + 1,)) #Assuming id starts at 1
+        cursor.execute("SELECT title, description FROM Exercises WHERE id = ?", (index + 1,))
         result = cursor.fetchone()
         conn.close()
         if result:
@@ -63,7 +64,7 @@ def get_recommended_plan(index):
     except sqlite3.Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
-@app.get("/api/recommendations") #Changed to GET request
+@app.get("/api/recommendations")
 async def process_user_data(
     weight: float = Query(..., description="User's weight"),
     height: float = Query(..., description="User's height"),
@@ -79,7 +80,7 @@ async def process_user_data(
             raise HTTPException(status_code=500, detail="Model is not loaded properly")
 
         user_vector = tfidf_vectorizer.transform(
-            [f"{body_part} {level}"] #removed gender, since the model does not use it.
+            [f"{body_part} {level}"]
         )
 
         similarities = cosine_similarity(user_vector, tfidf_matrix)

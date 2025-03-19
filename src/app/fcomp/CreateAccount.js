@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import SignButton from "./SignButton";
+import { useRouter } from "next/navigation";
 
 const FormContainer = styled.div`
   width: 700px;
@@ -65,14 +66,15 @@ const ErrorText = styled.p`
 `;
 
 function Registration() {
-    const [username, setUsername] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [usernameError, setUsernameError] = useState(false);
-    const [emailError, setEmailError] = useState(false);
-    const [passwordError, setPasswordError] = useState(false);
-    const [confirmPasswordError, setConfirmPasswordError] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [usernameError, setUsernameError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const [confirmPasswordError, setConfirmPasswordError] = useState(false);
+  const router = useRouter();
 
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);
@@ -121,12 +123,36 @@ function Registration() {
     }
 
     // No API call or data collection here
+        if (username && email && password && confirmPassword && password === confirmPassword) {
+            try {
+                const response = await fetch("http://localhost:8000/api/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        password,
+                    }),
+                });
 
-    // You can add a success message or redirect if needed
-    if (username && email && password && confirmPassword && password === confirmPassword) {
-        console.log("Registration successful!"); 
-    }
-  };
+                if (response.ok) {
+                    console.log("Registration successful!");
+                    router.push("/home_page"); // Redirect to home_page
+                    // Redirect or show a success message
+                } else {
+                    const errorData = await response.json();
+                    console.error("Registration failed:", errorData.detail);
+                    // Show an error message to the user
+                }
+            } catch (error) {
+                console.error("Error during registration:", error);
+                // Show a network error message
+            }
+        }
+    };
+
 
   return (
     <FormContainer onSubmit={handleSubmit}>
@@ -173,7 +199,16 @@ function Registration() {
 
       {/* Create Button */}
       <center>
-        <SignButton type="submit" disabled={!username || !email || !password || !confirmPassword || password !== confirmPassword}>
+        <SignButton
+          type="submit"
+          disabled={
+            !username ||
+            !email ||
+            !password ||
+            !confirmPassword ||
+            password !== confirmPassword
+          }
+        >
           Create
         </SignButton>
       </center>

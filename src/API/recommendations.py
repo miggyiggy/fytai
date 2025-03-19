@@ -1,21 +1,29 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 import sqlite3
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
+import logging
 
 app = FastAPI()
+
+# Configure logging
+logging.basicConfig(level=logging.ERROR)  # Log errors and above
 
 class UserInput(BaseModel):
     weight: float
     height: float
     body_part: str
     level: str
-    days_per_week: int  # Added days_per_week
+    days_per_week: int
 
 # Load the trained model
-with open('trainedmodel.pkl', 'rb') as f:
-    tfidf_matrix, tfidf_vectorizer = pickle.load(f)
+try:
+    with open('trainedmodel.pkl', 'rb') as f:
+        tfidf_matrix, tfidf_vectorizer = pickle.load(f)
+except FileNotFoundError:
+    logging.error("trainedmodel.pkl not found.")
+    tfidf_matrix, tfidf_vectorizer = None, None
 
 def calculate_bmi(weight, height):
     """Calculates BMI."""
@@ -38,37 +46,43 @@ def determine_fitness_goal(bmi):
 
 def get_workout_recommendations(body_part, level):
     """Generates workout recommendations using the trained model."""
-    conn_workouts = sqlite3.connect("gym_database.db")
-    cursor_workouts = conn_workouts.cursor()
+    try:
+        conn_workouts = sqlite3.connect("gym_database.db")
+        cursor_workouts = conn_workouts.cursor()
 
-    # Corrected column name (removed # if it's not valid)
-    cursor_workouts.execute("SELECT title, description FROM Exercises")
-    exercises = cursor_workouts.fetchall()
-    conn_workouts.close()
+        cursor_workouts.execute("SELECT title, description FROM Exercises")
+        exercises = cursor_workouts.fetchall()
+        conn_workouts.close()
 
-    if not exercises:
-        raise HTTPException(status_code=404, detail="No exercises found.")
+        if not exercises:
+            raise HTTPException(status_code=404, detail="No exercises found.")
 
-    # Create a query based on body_part and level
-    query = f"{body_part} {level}"
+        query = f"{body_part} {level}"
+        query_tfidf = tfidf_vectorizer.transform([query])
+        similarity_scores = cosine_similarity(query_tfidf, tfidf_matrix).flatten()
+        top_indices = similarity_scores.argsort()[-min(5, len(similarity_scores)):][::-1]
 
-    # Transform the query using the TF-IDF vectorizer
-    query_tfidf = tfidf_vectorizer.transform([query])
+        recommendations = [
+            {"title": exercises[i][0], "description": exercises[i][1]}
+            for i in top_indices
+        ]
+        return recommendations
 
-    # Calculate cosine similarity
-    similarity_scores = cosine_similarity(query_tfidf, tfidf_matrix).flatten()
-
-    # Get the top 5 recommendations
-    top_indices = similarity_scores.argsort()[-min(5, len(similarity_scores)):][::-1]
-
-    recommendations = [
-        {"title": exercises[i][0], "description": exercises[i][1]}
-        for i in top_indices
-    ]
-    return recommendations
+    except sqlite3.Error as e:
+        logging.error(f"Database error: {e}")
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+    except Exception as e:
+        logging.error(f"An unexpected error occurred: {e}")
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {e}")
 
 @app.get("/api/recommendations")
-async def recommend_workouts(weight: float, height: float, body_part: str, level: str, days_per_week: int):
+async def recommend_workouts(
+    weight: float = Query(..., description="User's weight"),
+    height: float = Query(..., description="User's height"),
+    body_part: str = Query(..., description="Target muscle group"),
+    level: str = Query(..., description="Fitness level"),
+    days_per_week: int = Query(..., description="Days per week to workout"),
+):
     """API endpoint to get workout recommendations."""
     bmi = calculate_bmi(weight, height)
     fitness_goal = determine_fitness_goal(bmi)
