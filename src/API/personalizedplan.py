@@ -1,15 +1,20 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pickle
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+import sqlite3
 
 app = FastAPI()
 
+origins = [
+    "http://localhost:3000",  # Corrected CORS origin
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -18,15 +23,15 @@ app.add_middleware(
 class UserInput(BaseModel):
     weight: float
     height: float
-    gender: str
     body_part: str
     level: str
+    days_per_week: int  # Added days_per_week
 
 try:
     with open('trainedmodel.pkl', 'rb') as f:
         tfidf_matrix, tfidf_vectorizer = pickle.load(f)
 except FileNotFoundError:
-    print("" Error: trainedmodel.pkl not found!")
+    print("Error: trainedmodel.pkl not found!")
     tfidf_matrix, tfidf_vectorizer = None, None
 
 def calculate_bmi(weight, height):
@@ -44,27 +49,49 @@ def get_fitness_goal(bmi):
     else:
         return "Consult a healthcare professional for personalized advice."
 
-@app.post("/api/recommendations")
-async def process_user_data(user_input: UserInput):
+def get_recommended_plan(index):
     try:
-        bmi = calculate_bmi(user_input.weight, user_input.height)
+        conn = sqlite3.connect("gym_database.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT title, description FROM Exercises WHERE id = ?", (index + 1,)) #Assuming id starts at 1
+        result = cursor.fetchone()
+        conn.close()
+        if result:
+            return {"title": result[0], "description": result[1]}
+        else:
+            return None
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+
+@app.get("/api/recommendations") #Changed to GET request
+async def process_user_data(
+    weight: float = Query(..., description="User's weight"),
+    height: float = Query(..., description="User's height"),
+    body_part: str = Query(..., description="Target body part"),
+    level: str = Query(..., description="Fitness level"),
+    days_per_week: int = Query(..., description="Days per week to workout"),
+):
+    try:
+        bmi = calculate_bmi(weight, height)
         fitness_goal = get_fitness_goal(bmi)
 
         if not tfidf_vectorizer or not tfidf_matrix:
             raise HTTPException(status_code=500, detail="Model is not loaded properly")
 
         user_vector = tfidf_vectorizer.transform(
-            [f"{user_input.gender} {user_input.body_part} {user_input.level}"]
+            [f"{body_part} {level}"] #removed gender, since the model does not use it.
         )
 
         similarities = cosine_similarity(user_vector, tfidf_matrix)
         recommended_index = np.argmax(similarities)
 
+        recommended_plan = get_recommended_plan(recommended_index)
+
         return {
             "bmi": bmi,
             "fitness_goal": fitness_goal,
-            "recommended_plan_index": int(recommended_index)
+            "recommended_plan": recommended_plan,
         }
-    
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
