@@ -1,121 +1,104 @@
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
-import sqlite3
+import pandas as pd
 import pickle
-from sklearn.metrics.pairwise import cosine_similarity
 import logging
-import os  # Import os module for path manipulation
+import os
+import subprocess  # For running the main.py script
+import json
 
 app = FastAPI()
 
-# Configure logging
-logging.basicConfig(level=logging.ERROR)  # Log errors and above
+logging.basicConfig(level=logging.INFO)
 
 class UserInput(BaseModel):
-    weight: float
-    height: float
-    body_part: str
-    level: str
-    days_per_week: int
+    Age: int
+    Gender: str
+    Level: str
+    Weight_kg: float
+    Height_m: float
+    Resting_BPM: int
+    Fat_Percentage: float
+    Water_Intake_liters: float
+    Workout_Frequency_days_week: int
+    Workout_Days: int
+    Exercises_Per_Day: int
+    Preferred_Workout: str
+    Focused_Body_Parts: str  # Comma-separated string
 
-# Construct the absolute path to main.pkl
-script_dir = os.path.dirname(os.path.abspath(__file__))  # Get the directory of the current script
-model_path = os.path.join(script_dir, '..', 'AI', 'main.pkl')
-
-# Load the trained model
-try:
-    with open(model_path, 'rb') as f:
-        tfidf_matrix, tfidf_vectorizer, another_object = pickle.load(f)
-except FileNotFoundError:
-    logging.error(f"main.pkl not found at {model_path}")
-    tfidf_matrix, tfidf_vectorizer = None, None
-
-def calculate_bmi(weight, height):
-    """Calculates BMI."""
-    if height <= 0:
-        return "Invalid height"
-    return round(weight / (height ** 2), 2)
-
-def determine_fitness_goal(bmi):
-    """Determines fitness goal based on BMI."""
-    if isinstance(bmi, str):
-        return "Cannot determine fitness goal due to invalid BMI"
-    if bmi < 18.5:
-        return "Gain weight"
-    elif 18.5 <= bmi < 25:
-        return "Maintain weight"
-    elif 25 <= bmi < 30:
-        return "Lose weight"
-    else:
-        return "Lose weight (consult a doctor)"
-
-# Construct the absolute path to gym_database.db
-db_path = os.path.join(script_dir, 'gym_database.db')
-
-# Create the Exercises table during application startup
-try:
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS Exercises (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            description TEXT
-            -- Add other columns as needed
-        )
-    """)
-    conn.commit()
-    conn.close()
-    print("Exercises table created or already existed.")
-except sqlite3.Error as e:
-    logging.error(f"Database error during table creation: {e}")
-
-def get_workout_recommendations(body_part, level):
-    """Generates workout recommendations using the trained model."""
+def run_main_script(user_data):
+    """Runs the main.py script with user data and returns the workout plan."""
     try:
-        conn_workouts = sqlite3.connect(db_path)
-        cursor_workouts = conn_workouts.cursor()
+        # Create a temporary JSON file to pass user data to main.py
+        user_data_file = "user_data.json"
+        with open(user_data_file, "w") as f:
+            json.dump(user_data, f)
 
-        cursor_workouts.execute("SELECT title, description FROM Exercises")
-        exercises = cursor_workouts.fetchall()
-        conn_workouts.close()
+        # Run main.py with command-line arguments
+        members_file = "gym_members.csv"  # Replace with actual file path
+        exercises_file = "exercises.csv"  # Replace with actual file path
+        result = subprocess.run(
+            [
+                "python",
+                "main.py",
+                "--members_file",
+                members_file,
+                "--exercises_file",
+                exercises_file,
+            ],
+            capture_output=True,
+            text=True,
+            input=f"--user_data_file={user_data_file}",
+            shell=True,
+        )
 
-        if not exercises:
-            raise HTTPException(status_code=404, detail="No exercises found.")
+        # Delete the temporary JSON file
+        os.remove(user_data_file)
 
-        query = f"{body_part} {level}"
-        query_tfidf = tfidf_vectorizer.transform([query])
-        similarity_scores = cosine_similarity(query_tfidf, tfidf_matrix).flatten()
-        top_indices = similarity_scores.argsort()[-min(5, len(similarity_scores)):][::-1]
-
-        recommendations = [
-            {"title": exercises[i][0], "description": exercises[i][1]}
-            for i in top_indices
-        ]
-        return recommendations
-
-    except sqlite3.Error as e:
-        logging.error(f"Database error: {e}")
-        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+        if result.returncode == 0:
+            # Parse the output from main.py (assuming it's a JSON string)
+            output = result.stdout.strip()
+            # Extract the workout plan part from the output.
+            workout_plan_start = output.find("AI-Generated Workout Plan:")
+            if workout_plan_start != -1:
+                workout_plan_str = output[workout_plan_start:]
+                # Convert the workout plan string to a JSON object
+                workout_plan_json = {}
+                current_day = None
+                for line in workout_plan_str.split('\n'):
+                    line = line.strip()
+                    if line.startswith('Day'):
+                        current_day = line[:-1]
+                        workout_plan_json[current_day] = []
+                    elif line.startswith('Exercise'):
+                        exercise_data = {}
+                        exercise_data['Exercise'] = line.split('(')[0].replace('Exercise:', '').strip()
+                        exercise_data['Type'] = line.split('(')[1].split(')')[0].strip()
+                        workout_plan_json[current_day].append(exercise_data)
+                return workout_plan_json
+            else:
+                logging.error("Workout plan not found in main.py output.")
+                return None
+        else:
+            logging.error(f"main.py script failed: {result.stderr}")
+            return None
     except Exception as e:
-        logging.error(f"An unexpected error occurred: {e}")
-        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {e}")
+        logging.error(f"Error running main.py: {e}")
+        return None
 
-@app.get("/api/recommendations")
-async def recommend_workouts(
-    weight: float = Query(..., description="User's weight"),
-    height: float = Query(..., description="User's height"),
-    body_part: str = Query(..., description="Target muscle group"),
-    level: str = Query(..., description="Fitness level"),
-    days_per_week: int = Query(..., description="Days per week to workout"),
-):
-    """API endpoint to get workout recommendations."""
-    bmi = calculate_bmi(weight, height)
-    fitness_goal = determine_fitness_goal(bmi)
-    recommendations = get_workout_recommendations(body_part, level)
-
-    return {
-        "bmi": bmi,
-        "fitness_goal": fitness_goal,
-        "recommendations": recommendations,
-    }
+@app.post("/api/workout_plan")
+async def generate_workout_plan(user_input: UserInput):
+    """Generates a workout plan using the main.py script."""
+    try:
+        user_data = user_input.dict()
+        user_data["Focused_Body_Parts"] = [
+            part.strip() for part in user_data["Focused_Body_Parts"].split(",")
+        ]
+        workout_plan = run_main_script(user_data)
+        if workout_plan:
+            return workout_plan
+        else:
+            raise HTTPException(status_code=500, detail="Failed to generate workout plan.")
+    except Exception as e:
+        logging.error(f"API error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
