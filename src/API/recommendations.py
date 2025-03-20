@@ -19,7 +19,7 @@ class UserInput(BaseModel):
 
 # Load the trained model
 try:
-    with open('../AI/trained_model.pkl', 'rb') as f:
+    with open('../AI/trained_model (1).pkl', 'rb') as f:
         tfidf_matrix, tfidf_vectorizer = pickle.load(f)
 except FileNotFoundError:
     logging.error("trained_model.pkl not found.")
@@ -43,6 +43,24 @@ def determine_fitness_goal(bmi):
         return "Lose weight"
     else:
         return "Lose weight (consult a doctor)"
+
+# Create the Exercises table during application startup
+try:
+    conn = sqlite3.connect("gym_database.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS Exercises (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            description TEXT
+            -- Add other columns as needed
+        )
+    """)
+    conn.commit()
+    conn.close()
+    print("Exercises table created or already existed.")
+except sqlite3.Error as e:
+    logging.error(f"Database error during table creation: {e}")
 
 def get_workout_recommendations(body_part, level):
     """Generates workout recommendations using the trained model."""
