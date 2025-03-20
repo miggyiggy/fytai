@@ -11,6 +11,8 @@ const NavBarContainer = styled.nav`
   align-items: center;
   padding: 1rem;
   justify-content: space-between;
+  position: relative;
+  margin-bottom: 0;
 `;
 
 const NavItems = styled.div`

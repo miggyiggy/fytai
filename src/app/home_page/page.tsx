@@ -34,16 +34,13 @@ export default function Home() {
       <NavBar />
       <ContentContainer>
         <ImageContainer>
-         <div>
-            {showImage && (
                 <Image 
                     src="/Images/FytAI Page 2.jpg" 
                     alt="Background Image"
                     layout="fill"
                     objectFit="cover"
                 />
-            )}
-        </div>
+
         </ImageContainer>
       </ContentContainer>
     </PageContainer>

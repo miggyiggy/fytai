@@ -4,6 +4,7 @@ import sqlite3
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
+import os  # Import os module for path manipulation
 
 app = FastAPI()
 
@@ -17,12 +18,16 @@ class UserInput(BaseModel):
     level: str
     days_per_week: int
 
+# Construct the absolute path to main.pkl
+script_dir = os.path.dirname(os.path.abspath(__file__))  # Get the directory of the current script
+model_path = os.path.join(script_dir, '..', 'AI', 'main.pkl')
+
 # Load the trained model
 try:
-    with open('../AI/trained_model (1).pkl', 'rb') as f:
-        tfidf_matrix, tfidf_vectorizer = pickle.load(f)
+    with open(model_path, 'rb') as f:
+        tfidf_matrix, tfidf_vectorizer, another_object = pickle.load(f)
 except FileNotFoundError:
-    logging.error("trained_model.pkl not found.")
+    logging.error(f"main.pkl not found at {model_path}")
     tfidf_matrix, tfidf_vectorizer = None, None
 
 def calculate_bmi(weight, height):
@@ -44,9 +49,12 @@ def determine_fitness_goal(bmi):
     else:
         return "Lose weight (consult a doctor)"
 
+# Construct the absolute path to gym_database.db
+db_path = os.path.join(script_dir, 'gym_database.db')
+
 # Create the Exercises table during application startup
 try:
-    conn = sqlite3.connect("gym_database.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Exercises (
@@ -65,7 +73,7 @@ except sqlite3.Error as e:
 def get_workout_recommendations(body_part, level):
     """Generates workout recommendations using the trained model."""
     try:
-        conn_workouts = sqlite3.connect("gym_database.db")
+        conn_workouts = sqlite3.connect(db_path)
         cursor_workouts = conn_workouts.cursor()
 
         cursor_workouts.execute("SELECT title, description FROM Exercises")

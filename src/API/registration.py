@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import sqlite3
+import bcrypt  # For password hashing
 
 app = FastAPI()
 
@@ -55,7 +56,10 @@ async def register_user(user: UserRegistration):
             conn.close()
             raise HTTPException(status_code=400, detail="Username or email already exists")
 
-        cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", (user.username, user.email, user.password)) # In a real app, hash the password!
+        # Hash the password
+        hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
+
+        cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", (user.username, user.email, hashed_password.decode('utf-8'))) # Store hashed password
         conn.commit()
         conn.close()
         return {"message": "User registered successfully"}

@@ -29,10 +29,10 @@ class UserInput(BaseModel):
     days_per_week: int
 
 try:
-    with open('../AI/trained_model.pkl', 'rb') as f:
+    with open('../AI/main.pkl', 'rb') as f:
         tfidf_matrix, tfidf_vectorizer = pickle.load(f)
 except FileNotFoundError:
-    print("Error: trained_model.pkl not found!")
+    print("Error: main.pkl not found!")
     tfidf_matrix, tfidf_vectorizer = None, None
 
 def calculate_bmi(weight, height):
