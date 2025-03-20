@@ -19,10 +19,10 @@ class UserInput(BaseModel):
 
 # Load the trained model
 try:
-    with open('trainedmodel.pkl', 'rb') as f:
+    with open('../AI/trained_model.pkl', 'rb') as f:
         tfidf_matrix, tfidf_vectorizer = pickle.load(f)
 except FileNotFoundError:
-    logging.error("trainedmodel.pkl not found.")
+    logging.error("trained_model.pkl not found.")
     tfidf_matrix, tfidf_vectorizer = None, None
 
 def calculate_bmi(weight, height):
